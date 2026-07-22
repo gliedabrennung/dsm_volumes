@@ -1,0 +1,41 @@
+[
+  {
+    "object_id": 1,
+    "kind": "fill",
+    "area_m2": 73.5075,
+    "cut_volume_m3": -0.0,
+    "fill_volume_m3": 89.85499140748712,
+    "net_volume_m3": 89.85499140748712,
+    "mean_height_m": 1.2223921560043143,
+    "max_height_m": 2.297458883133629,
+    "min_height_m": 0.04001999999999839,
+    "centroid_row": 140.11080501989593,
+    "centroid_col": 226.64585246403428
+  },
+  {
+    "object_id": 2,
+    "kind": "fill",
+    "area_m2": 245.34,
+    "cut_volume_m3": -0.0,
+    "fill_volume_m3": 215.93523075938378,
+    "net_volume_m3": 215.93523075938378,
+    "mean_height_m": 0.880146860517583,
+    "max_height_m": 1.7000000000000028,
+    "min_height_m": 0.01038888888888323,
+    "centroid_row": 140.30190755685987,
+    "centroid_col": 130.6950660308144
+  },
+  {
+    "object_id": 6,
+    "kind": "cut",
+    "area_m2": 141.29999999999998,
+    "cut_volume_m3": 137.55593601649952,
+    "fill_volume_m3": 0.0,
+    "net_volume_m3": -137.55593601649952,
+    "mean_height_m": -0.9735027318931319,
+    "max_height_m": -0.0965204081632578,
+    "min_height_m": -1.7993161836869689,
+    "centroid_row": 279.4105095541401,
+    "centroid_col": 279.8375796178344
+  }
+]

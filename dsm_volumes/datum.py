@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.interpolate import griddata
+from scipy.spatial import QhullError
 
 from .config import PipelineConfig
 from .segmentation import ObjectCandidate
@@ -22,6 +25,13 @@ def _fit_plane(shape: tuple[int, int], ys_idx: np.ndarray, xs_idx: np.ndarray, z
     coeffs, *_ = np.linalg.lstsq(A, zs, rcond=None)
     yy, xx = np.mgrid[0 : shape[0], 0 : shape[1]]
     return coeffs[0] + coeffs[1] * xx + coeffs[2] * yy
+
+
+def _fit_plane_safe(shape: tuple[int, int], ys_idx: np.ndarray, xs_idx: np.ndarray, zs: np.ndarray) -> np.ndarray:
+    try:
+        return _fit_plane(shape, ys_idx, xs_idx, zs)
+    except np.linalg.LinAlgError:
+        return np.full(shape, float(np.mean(zs)) if len(zs) else np.nan, dtype=np.float64)
 
 
 def _fit_tin(shape: tuple[int, int], ys_idx: np.ndarray, xs_idx: np.ndarray, zs: np.ndarray) -> np.ndarray:
@@ -67,9 +77,20 @@ def compute_datum_for_object(
         fallback_value = float(np.mean(zs)) if len(zs) else float(np.nanmean(dsm_local))
         datum_local = np.full(dsm_local.shape, fallback_value, dtype=np.float64)
     elif method == "plane":
-        datum_local = _fit_plane(dsm_local.shape, ys_idx, xs_idx, zs)
+        datum_local = _fit_plane_safe(dsm_local.shape, ys_idx, xs_idx, zs)
     elif method == "tin":
-        datum_local = _fit_tin(dsm_local.shape, ys_idx, xs_idx, zs)
+        try:
+            datum_local = _fit_tin(dsm_local.shape, ys_idx, xs_idx, zs)
+        except (QhullError, ValueError) as exc:
+            warnings.warn(
+                f"TIN-датум не построен для объекта (id={candidate.id}): {exc}. "
+                "Откат на метод 'plane'. Обычно означает, что вокруг объекта "
+                "нет достаточного количества настоящих точек фонового грунта — "
+                "проверьте охват ЦМП вокруг объекта.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            datum_local = _fit_plane_safe(dsm_local.shape, ys_idx, xs_idx, zs)
     else:
         raise ValueError(f"Неизвестный метод датума: {method!r}")
 
